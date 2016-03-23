@@ -1,0 +1,1 @@
+(function(){console.log("hola mundo")}).call(this);

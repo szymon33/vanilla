@@ -1,0 +1,8 @@
+/bower_components/*
+/.sass-cache/*
+*.DS_Store
+/stylesheets/*
+/scss/foundation/*
+/scss/font-awesome/*
+/js/*
+
