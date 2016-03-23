@@ -1,3 +1,20 @@
 body {
-  background: red;
+  background: gray;
+}
+
+li.selected {
+  background: black;
+  color: white;
+}
+
+//
+// dropdown navigation
+//
+
+.f-dropdown {
+  display: none;
+
+  &.open {
+    display: block;
+  }
 }

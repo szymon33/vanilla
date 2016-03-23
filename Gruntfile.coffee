@@ -13,7 +13,7 @@ module.exports = (grunt) ->
         flatten: true
         cwd: 'coffee'
         src: ['*.coffee']
-        dest: 'js'
+        dest: 'dist/js'
         ext: '.js'
 
     sass:
@@ -40,6 +40,16 @@ module.exports = (grunt) ->
           ext: '.html'
         ]
 
+    copy:
+      dist:
+        vendors: [
+          expand: true
+          cwd: 'vendors/js'
+          src: '**/*.*'
+          dest: 'dist/js'
+          ext: '.js'
+        ]
+
     watch:
       options:
         livereload: true
@@ -50,7 +60,7 @@ module.exports = (grunt) ->
         tasks: ['coffee']
 
       js:
-        files: 'js/*.js'
+        files: 'js/**'
         tasks: ['uglify']
 
       sass:
@@ -61,12 +71,17 @@ module.exports = (grunt) ->
         files: 'templates/**/*.slim'
         tasks: ['slim']
 
+      vendors:
+        files: 'vendors/**'
+        tasks: ['copy']
+
   grunt.loadNpmTasks('grunt-contrib-sass')
   grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-contrib-uglify')
+  grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks('grunt-slim')
 
   grunt.loadNpmTasks('grunt-contrib-watch')
 
   # Default task(s).
-  grunt.registerTask('default', ['sass', 'coffee', 'slim', 'uglify'])
+  grunt.registerTask('default', ['copy', 'sass', 'coffee', 'slim', 'uglify'])
