@@ -2,8 +2,12 @@ jQuery ->
   buildDiv = ->
     div = $("<div class='custom-dropdown-area'></div>")
 
-  buildPilot = (promptTxt) ->
-    pilot = $("<a href='#' class='custom-dropdown-button'>" + promptTxt + "</a>")
+  buildPilot = ->
+    pilot = $("<a href='#' class='custom-dropdown-button'></a>")
+
+  setPilot = (dropdown) ->
+    pilot = dropdown.prev('.custom-dropdown-button')
+    pilot.text(calculatePrompt(dropdown))
 
   buildDropdown = (select) ->
     type = if select.prop('multiple') then 'multiple' else 'single'
@@ -38,11 +42,11 @@ jQuery ->
     target = $(elem).parent().data('target')
     value =  $(elem).data('value')
     if findTag(target, value).length == 0
-      tag = $("<a href='#' data-ref-target='" + 
+      tag = $("<a href='#' class='dropdown-tag' data-ref-target='" + 
         target + 
         "' data-ref-value='" +
         value +
-        "' class='dropdown-tag'><span>" +
+        "'><span>" +
         value +
         "</span></a>")
       $('#tags').append(tag)
@@ -70,32 +74,39 @@ jQuery ->
     selectId = select.attr('id')
     div = buildDiv()
     dropdown = buildDropdown(select)
-    initTags(dropdown)
-    promptTxt = calculatePrompt(dropdown)
-    pilot = buildPilot(promptTxt)
-    div.append(pilot)
+    div.append(buildPilot())
     div.append(dropdown)
+    setPilot(dropdown)
+    initTags(dropdown)
     select.after(div)
 
-  $(document).on 'click', 'ul.custom-dropdown-options > li', ->
+  $(document).on 'click', 'ul.custom-dropdown-options > li', (e) ->
+    e.preventDefault()
+    e.stopPropagation()
     dropdown = $(@).parent()
-    pilot = dropdown.prev('.custom-dropdown-button')
     if dropdown.data('type') == 'single'
       previous = dropdown.find('li.selected')
       removeTag(previous) unless previous[0] == @
     toggleTag(@)
-    promptTxt = calculatePrompt(dropdown)
-    pilot.text(promptTxt)
+    setPilot(dropdown)
 
-  $(document).on 'click', '.custom-dropdown-button', ->
+  $(document).on 'click', '.custom-dropdown-button', (e) ->
+    e.preventDefault()
+    e.stopPropagation()
     dropdown = $(@).next('.custom-dropdown-options')
     if dropdown.hasClass('open')
       dropdown.removeClass('open')
     else
+      # close others, behive like menu
       dropdown.closest('form.custom').find('.custom-dropdown-options.open').removeClass('open')
       dropdown.addClass('open')
 
-  $(document).on 'click', '.dropdown-tag', ->
+  $(document).on 'click', '.dropdown-tag', (e) ->
     dropdown = $(document).find("[data-target='" + $(@).data('ref-target') + "']")
     li =  $(dropdown).find("[data-value='" + $(@).data('ref-value') + "']")
     removeTag(li)
+    setPilot(dropdown)
+
+  $(document).on 'click', ->
+    dropdowns = $('.custom-dropdown-options.open')
+    $(dropdowns).removeClass('open') if dropdowns.length > 0

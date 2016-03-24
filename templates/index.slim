@@ -6,39 +6,40 @@ html
     link href="stylesheets/foundation.min.css" rel="stylesheet" /
     link href="stylesheets/app.css" rel="stylesheet" /
     script src="js/jquery.min.js"
+
   body
-    form.custom action="serach" method="post"
-      .row
-        .large-2.columns
-            input name="keyword" placeholder=("Keyword") type="text" /
+    form.row.custom action="serach" method="post"
+      .large-3.columns
+        input name="keyword" placeholder=("Keyword") type="text" /
 
-        .large-2.columns
-          select#functionalarea name='functionalarea' data-prompt="Functional Area" multiple='true'
-            option Projectmanagement
-            option Sales
-            option selected='true' Directie
-            option selected='true' Development
-            option HR
+      .large-2.columns
+        select#functionalarea name='functionalarea' data-prompt="Functional Area" multiple="multiple"
+          option Projectmanagement
+          option Sales
+          option SELECTED="SELECTED" Directie
+          option SELECTED="SELECTED" Development
+          option HR
 
-        .large-2.columns
-          select#education name='education' data-prompt="Education" multiple='true'
-            option Level 1
-            option Level 2
-            option selected='true' Level 3
+      .large-2.columns
+        select#education name='education' data-prompt="Education" multiple="multiple"
+          option Level 1
+          option Level 2
+          option SELECTED="SELECTED" Level 3
 
-        .large-2.columns
-            input name="location" placeholder=("Search by location") type="text" /
+      .large-2.columns
+        input name="location" placeholder=("Search by location") type="text" /
 
-        .large-2.columns
-          select#radious name='radious' data-prompt="Radious"
-            option 10km
-            option 20km
-            option 30km
-            option 40km
-            option 50km
+      .large-2.columns
+        select#radious name='radious' data-prompt="Radious"
+          option 10km
+          option 20km
+          option 30km
+          option 40km
+          option 50km
 
-        .large-2.columns
-            button.button type="submit"  Search
-      .row
-        #tags.large-12.columns
+      .large-1.expanded.columns
+        button.button type="submit"  Search
+    .row
+      #tags.large-12.columns  
+
     script src="js/app.js" 
