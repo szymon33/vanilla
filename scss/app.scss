@@ -39,7 +39,7 @@ a.custom-dropdown-button {
 
 ul.custom-dropdown-options {
   position: absolute;
-  width: 170px;
+  width: 10.625em;
   border: $border;
   border-top: 0;
   list-style-type: none;
@@ -52,7 +52,7 @@ ul.custom-dropdown-options {
     padding: .5em 0.7em;
     &.selected {
       color: $secondary-color;
-      background: none;
+      padding-left: 0.25em;
     }
   }
 }
