@@ -23,7 +23,7 @@
       if (inner.addEventListener) {
         return inner.addEventListener(eventName, handler, false);
       } else {
-        return el.attachEvent('on' + eventName, function() {
+        return inner.attachEvent('on' + eventName, function() {
           return handler.call(inner);
         });
       }

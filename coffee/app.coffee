@@ -18,7 +18,7 @@ addEventListener = (el, eventName, filter, handler) ->
     if (inner.addEventListener)
       inner.addEventListener(eventName, handler, false)
     else
-      el.attachEvent 'on' + eventName, ->
+      inner.attachEvent 'on' + eventName, ->
         handler.call(inner)
   if filter?
     forEach el.querySelectorAll(filter), (node) ->
@@ -27,8 +27,7 @@ addEventListener = (el, eventName, filter, handler) ->
     make(el, eventName, handler)
 
 forEachElement = (selector, fn) ->
-  forEach document.querySelectorAll(selector), (node) ->
-    fn(node)
+  forEach document.querySelectorAll(selector), (node) -> fn(node)
 
 addClass = (el, className) ->
   if (el.classList) then el.classList.add(className) else el.className += ' ' + className
@@ -40,8 +39,7 @@ removeClass = (el, className) ->
     else if inner.className
       inner.className = inner.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ')
   if el.length
-    forEach el, (item) ->
-      make(item, className)
+    forEach el, (item) -> make(item, className)
   else
     make(el, className)
 
@@ -81,6 +79,17 @@ setPilot = (dropdown) ->
     pilot.innerText = calculatePrompt(dropdown)
   pilot
 
+buildDropdownItem = (option) ->
+  li = document.createElement('li')
+  li.className = 'option-item'
+  li.dataset.value = option.value
+  span = document.createElement('span')
+  span.className = 'option-title'
+  span.innerHTML = option.innerHTML
+  li.appendChild(span)
+  if option.getAttribute('selected') then addClass(li, 'selected') else removeClass(li, 'selected')
+  li
+
 buildDropdown = (select) ->
   type = if select.getAttribute('multiple') then 'multiple' else 'single'
   ul = document.createElement('ul')
@@ -88,16 +97,7 @@ buildDropdown = (select) ->
   ul.dataset.prompt = select.dataset.prompt
   ul.dataset.type = type
   ul.dataset.target = '#' + select.getAttribute('id')
-  forEach select.querySelectorAll('option'), (option) ->
-    li = document.createElement('li')
-    li.className = 'option-item'
-    li.dataset.value = option.value
-    span = document.createElement('span')
-    span.className = 'option-title'
-    span.innerHTML = option.innerHTML
-    li.appendChild(span)
-    if option.getAttribute('selected') then addClass(li, 'selected') else removeClass(li, 'selected')
-    ul.appendChild(li)
+  forEach select.querySelectorAll('option'), (option) -> ul.appendChild(buildDropdownItem(option))
   ul
 
 calculatePrompt = (ul) ->
@@ -111,7 +111,8 @@ calculatePrompt = (ul) ->
     else selectedItems.toString() + ' items'
 
 findTag = (target, value) ->
-  document.getElementById('tags').querySelector("[data-reftarget='" + target + "'][data-refvalue='" + value + "']")
+  selector = "[data-reftarget='" + target + "'][data-refvalue='" + value + "']"
+  document.getElementById('tags').querySelector(selector)
 
 addTag = (elem) ->
   addClass(elem, 'selected')
@@ -133,14 +134,10 @@ removeTag = (elem) ->
   tag.parentNode.removeChild(tag)
 
 toggleTag = (elem) ->
-  if hasClass(elem, 'selected')
-    removeTag(elem)
-  else
-    addTag(elem)
+  if hasClass(elem, 'selected') then removeTag(elem) else addTag(elem)
 
 initTags = (dropdown) ->
-  forEach dropdown.querySelectorAll('li.selected'), (li) ->
-    addTag(li)
+  forEach dropdown.querySelectorAll('li.selected'), (li) -> addTag(li)
 
 #
 # On DOM loaded
