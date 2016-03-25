@@ -3,38 +3,51 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
     <title>Javascript test</title>
+    <link href="stylesheets/foundation.min.css" rel="stylesheet" />
     <link href="stylesheets/app.css" rel="stylesheet" />
   </head>
   <body>
-    <div class="container">
-      <form action="" method="">
-        <input name="keyword" placeholder="E.g. project manager" type="text" /><select multiple="">
+    <form action="serach" class="row custom" method="post">
+      <div class="large-3 columns">
+        <input name="keyword" placeholder="Keyword" type="text" />
+      </div>
+      <div class="large-2 columns">
+        <select data-prompt="Functional Area" id="functionalarea" multiple="multiple" name="functionalarea">
           <option>
             Projectmanagement
           </option>
           <option>
             Sales
           </option>
-          <option selected="selected">
+          <option SELECTED="SELECTED">
             Directie
           </option>
-          <option selected="selected">
+          <option SELECTED="SELECTED">
             Development
           </option>
           <option>
             HR
           </option>
-        </select><select multiple="">
+        </select>
+      </div>
+      <div class="large-2 columns">
+        <select data-prompt="Education" id="education" multiple="multiple" name="education">
           <option>
             Level 1
           </option>
           <option>
             Level 2
           </option>
-          <option selected="selected">
+          <option SELECTED="SELECTED">
             Level 3
           </option>
-        </select><input placeholder="Search for location" type="text" /><select>
+        </select>
+      </div>
+      <div class="large-2 columns">
+        <input name="location" placeholder="Search by location" type="text" />
+      </div>
+      <div class="large-2 columns">
+        <select data-prompt="Radious" id="radious" name="radious">
           <option>
             10km
           </option>
@@ -50,8 +63,14 @@
           <option>
             50km
           </option>
-        </select><button type="submit"> SEARCH</button>
-      </form>
+        </select>
+      </div>
+      <div class="large-1 expanded columns">
+        <button class="button" type="submit"> Search</button>
+      </div>
+    </form>
+    <div class="row">
+      <div class="large-12 columns" id="tags"></div>
     </div>
     <script src="js/app.js"></script>
   </body>

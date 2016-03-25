@@ -32,23 +32,22 @@ module.exports = (grunt) ->
       dist:
         options:
           pretty: true
-        files: [
+        files: [{
           expand: true
           cwd: 'templates'
           src: ['*.slim', '!_*.slim']
           dest: 'dist'
           ext: '.html'
-        ]
+        }]
 
     copy:
       dist:
-        vendors: [
+        files: [{
           expand: true
-          cwd: 'vendors/js'
-          src: '**/*.*'
-          dest: 'dist/js'
-          ext: '.js'
-        ]
+          cwd: 'vendors/'
+          src: ['**']
+          dest: 'dist/'
+        }]
 
     watch:
       options:
