@@ -18,21 +18,29 @@ a.custom-dropdown-button {
   color: #0a0a0a;
   background-color: #fefefe;
   border-radius: 0;
-  margin-bottom: 0; }
+  margin-bottom: 1em; }
   a.custom-dropdown-button:after {
     content: '\25BE';
     float: right;
     color: gray; }
 
+.custom-dropdown-area {
+  position: relative; }
+
 ul.custom-dropdown-options {
   position: absolute;
-  width: 10.625em;
+  top: 2.4375em;
+  width: 100%;
   border: 1px solid #cacaca;
   border-top: 0;
   list-style-type: none;
   margin-top: 0;
   margin-left: 0;
   background: #fefefe; }
+  @media only screen and (max-width: 1023px) {
+    ul.custom-dropdown-options {
+      position: relative;
+      top: -1em; } }
   ul.custom-dropdown-options li {
     height: 2.4375em;
     padding: .5em 0.7em; }
@@ -44,11 +52,8 @@ a.dropdown-tag {
   font-size: .9em;
   display: inline-block;
   text-align: center;
-  line-height: 1;
   cursor: pointer;
   vertical-align: middle;
-  border: 1px solid transparent;
-  border-radius: 0;
   padding: .5em 1em;
   margin: 0 1em 1em 0;
   background-color: #f4f4f4;

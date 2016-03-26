@@ -1,5 +1,5 @@
 (function() {
-  var addClass, addEventListener, addTag, buildDiv, buildDropdown, buildPilot, calculatePrompt, closest, findTag, forEach, forEachElement, hasClass, initTags, ready, removeClass, removeTag, setPilot, toggleTag;
+  var addClass, addEventListener, addTag, buildDiv, buildDropdown, buildDropdownItem, buildPilot, calculatePrompt, closest, findTag, forEach, forEachElement, hasClass, initTags, ready, removeClass, removeTag, setPilot, toggleTag;
 
   forEach = Function.prototype.call.bind(Array.prototype.forEach);
 
@@ -113,6 +113,23 @@
     return pilot;
   };
 
+  buildDropdownItem = function(option) {
+    var li, span;
+    li = document.createElement('li');
+    li.className = 'option-item';
+    li.dataset.value = option.value;
+    span = document.createElement('span');
+    span.className = 'option-title';
+    span.innerHTML = option.innerHTML;
+    li.appendChild(span);
+    if (option.getAttribute('selected')) {
+      addClass(li, 'selected');
+    } else {
+      removeClass(li, 'selected');
+    }
+    return li;
+  };
+
   buildDropdown = function(select) {
     var type, ul;
     type = select.getAttribute('multiple') ? 'multiple' : 'single';
@@ -122,20 +139,7 @@
     ul.dataset.type = type;
     ul.dataset.target = '#' + select.getAttribute('id');
     forEach(select.querySelectorAll('option'), function(option) {
-      var li, span;
-      li = document.createElement('li');
-      li.className = 'option-item';
-      li.dataset.value = option.value;
-      span = document.createElement('span');
-      span.className = 'option-title';
-      span.innerHTML = option.innerHTML;
-      li.appendChild(span);
-      if (option.getAttribute('selected')) {
-        addClass(li, 'selected');
-      } else {
-        removeClass(li, 'selected');
-      }
-      return ul.appendChild(li);
+      return ul.appendChild(buildDropdownItem(option));
     });
     return ul;
   };
@@ -156,7 +160,9 @@
   };
 
   findTag = function(target, value) {
-    return document.getElementById('tags').querySelector("[data-reftarget='" + target + "'][data-refvalue='" + value + "']");
+    var selector;
+    selector = "[data-reftarget='" + target + "'][data-refvalue='" + value + "']";
+    return document.getElementById('tags').querySelector(selector);
   };
 
   addTag = function(elem) {
