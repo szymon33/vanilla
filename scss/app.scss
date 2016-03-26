@@ -34,12 +34,20 @@ a.custom-dropdown-button {
   color: $primary-color;
   background-color: $input-background;
   border-radius: 0;
-  margin-bottom: 0;
+  margin-bottom: 1em;
 }
 
+.custom-dropdown-area { position: relative; }
+
 ul.custom-dropdown-options {
+  @media only screen and (max-width: 1023px) {
+    position: relative;
+    top: -1em;
+  }
+
   position: absolute;
-  width: 10.625em;
+  top: 2.4375em;
+  width: 100%;
   border: $border;
   border-top: 0;
   list-style-type: none;
@@ -61,11 +69,8 @@ a.dropdown-tag {
   font-size: .9em;
   display: inline-block;
   text-align: center;
-  line-height: 1;
   cursor: pointer;
   vertical-align: middle;
-  border: 1px solid transparent;
-  border-radius: 0;
   padding: .5em 1em;
   margin: 0 1em 1em 0;
   background-color: #f4f4f4;
@@ -78,4 +83,3 @@ a.dropdown-tag {
     padding-left: 1em;
   }
 }
-
