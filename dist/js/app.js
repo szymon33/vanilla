@@ -1,5 +1,5 @@
 (function() {
-  var addClass, addEventListener, addTag, buildDiv, buildDropdown, buildDropdownItem, buildPilot, calculatePrompt, closest, findTag, forEach, forEachElement, hasClass, initTags, ready, removeClass, removeTag, setPilot, toggleTag;
+  var App, Dropdown, Tag, addClass, addEventListener, forEach, hasClass, ready, removeClass;
 
   forEach = Function.prototype.call.bind(Array.prototype.forEach);
 
@@ -17,30 +17,14 @@
     }
   };
 
-  addEventListener = function(el, eventName, filter, handler) {
-    var make;
-    make = function(inner, eventName, handler) {
-      if (inner.addEventListener) {
-        return inner.addEventListener(eventName, handler, false);
-      } else {
-        return inner.attachEvent('on' + eventName, function() {
-          return handler.call(inner);
-        });
-      }
-    };
-    if (filter != null) {
-      return forEach(el.querySelectorAll(filter), function(node) {
-        return make(node, eventName, handler);
-      });
+  addEventListener = function(el, eventName, handler) {
+    if (el.addEventListener) {
+      return el.addEventListener(eventName, handler, false);
     } else {
-      return make(el, eventName, handler);
+      return el.attachEvent('on' + eventName, function() {
+        return handler.call(el);
+      });
     }
-  };
-
-  forEachElement = function(selector, fn) {
-    return forEach(document.querySelectorAll(selector), function(node) {
-      return fn(node);
-    });
   };
 
   addClass = function(el, className) {
@@ -55,9 +39,9 @@
     var make;
     make = function(inner, className) {
       if (inner.classList) {
-        return inner.classList.remove(className);
+        inner.classList.remove(className);
       } else if (inner.className) {
-        return inner.className = inner.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+        inner.className = inner.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
       }
     };
     if (el.length) {
@@ -71,193 +55,208 @@
 
   hasClass = function(el, className) {
     if (el.classList) {
-      return el.classList.contains(className);
+      el.classList.contains(className);
     } else {
-      return new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
+      new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
     }
   };
 
-  closest = function(el, selector) {
-    while (el) {
-      el = el.parentNode;
-      if ((el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector).call(el, selector)) {
-        break;
+  App = function() {
+    this.selected = null;
+    forEach(document.querySelectorAll('form.custom select'), (function(_this) {
+      return function(select) {
+        select.style.display = 'none';
+        return new Dropdown(_this, select);
+      };
+    })(this));
+    return addEventListener(document, 'click', (function(_this) {
+      return function() {
+        if (!!_this.selected) {
+          removeClass(_this.selected, 'open');
+          _this.selected = null;
+        }
+      };
+    })(this));
+  };
+
+  App.prototype.select = function($dropdown) {
+    if ($dropdown === this.selected) {
+      removeClass($dropdown, 'open');
+      this.selected = null;
+    } else {
+      if (!!this.selected) {
+        removeClass(this.selected, 'open');
       }
+      addClass($dropdown, 'open');
+      this.selected = $dropdown;
     }
+  };
+
+  Tag = function(maker, subject) {
+    this.maker = maker;
+    this.$subject = subject;
+    addClass(this.$subject, 'selected');
+    this.$container = document.getElementById('tags');
+    this.$el = this.el();
+    this.$container.appendChild(this.$el);
+    return this;
+  };
+
+  Tag.prototype.el = function() {
+    var el;
+    el = document.createElement('a');
+    el.className = 'dropdown-tag';
+    el.innerHTML = this.$subject.innerHTML;
+    el.href = '#';
+    addEventListener(el, 'click', (function(_this) {
+      return function(e) {
+        e.preventDefault();
+        return _this.destroy();
+      };
+    })(this));
     return el;
   };
 
-  buildDiv = function() {
-    var div;
-    div = document.createElement('div');
-    div.className = 'custom-dropdown-area';
-    return div;
+  Tag.prototype.destroy = function() {
+    removeClass(this.$subject, 'selected');
+    this.$container.removeChild(this.$el);
+    return this.maker.removeFromTags(this);
   };
 
-  buildPilot = function() {
+  Dropdown = function(collection, select) {
+    this.collection = collection;
+    this.tags = [];
+    this.type = select.getAttribute('multiple') || 'single';
+    this.defaultPrompt = select.dataset.prompt || "Choose...";
+    this.$el = this.el();
+    this.$dropdown = this.dropdown();
+    this.$pilot = this.pilot();
+    forEach(select.querySelectorAll('option'), (function(_this) {
+      return function(option) {
+        return _this.$dropdown.appendChild(_this.buildItem(option));
+      };
+    })(this));
+    this.$el.appendChild(this.$pilot);
+    this.$el.appendChild(this.$dropdown);
+    select.parentNode.appendChild(this.$el);
+    this.setPilot();
+    return this;
+  };
+
+  Dropdown.prototype.el = function() {
+    var el;
+    el = document.createElement('div');
+    el.className = 'custom-dropdown-area';
+    return el;
+  };
+
+  Dropdown.prototype.dropdown = function() {
+    var ul;
+    ul = document.createElement('ul');
+    ul.className = 'f-dropdown custom-dropdown-options';
+    return ul;
+  };
+
+  Dropdown.prototype.pilot = function() {
     var pilot;
     pilot = document.createElement('a');
     pilot.className = 'custom-dropdown-button';
     pilot.href = '#';
+    addEventListener(pilot, 'click', (function(_this) {
+      return function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return _this.collection.select(_this.$dropdown);
+      };
+    })(this));
     return pilot;
   };
 
-  setPilot = function(dropdown) {
-    var pilot;
-    pilot = dropdown.previousSibling;
-    if (pilot.textContent !== void 0) {
-      pilot.textContent = calculatePrompt(dropdown);
+  Dropdown.prototype.setPilot = function() {
+    if (this.$pilot.textContent !== void 0) {
+      this.$pilot.textContent = this.calculatePrompt();
     } else {
-      pilot.innerText = calculatePrompt(dropdown);
+      this.$pilot.innerText = this.calculatePrompt();
     }
-    return pilot;
   };
 
-  buildDropdownItem = function(option) {
-    var li, span;
+  Dropdown.prototype.calculatePrompt = function() {
+    var counter, temp;
+    counter = this.tags.length;
+    switch (counter) {
+      case 0:
+        return this.defaultPrompt;
+      case 1:
+        temp = this.tags[0].$el;
+        return temp.textContent || temp.innerText;
+      default:
+        return counter.toString() + ' items';
+    }
+  };
+
+  Dropdown.prototype.buildItem = function(option) {
+    var li;
     li = document.createElement('li');
     li.className = 'option-item';
-    li.dataset.value = option.value;
-    span = document.createElement('span');
-    span.className = 'option-title';
-    span.innerHTML = option.innerHTML;
-    li.appendChild(span);
+    li.innerHTML = option.innerHTML;
     if (option.getAttribute('selected')) {
-      addClass(li, 'selected');
-    } else {
-      removeClass(li, 'selected');
+      this.addToTags(new Tag(this, li));
     }
+    addEventListener(li, 'click', (function(_this) {
+      return function(e) {
+        var previous;
+        e.preventDefault();
+        e.stopPropagation();
+        if (_this.type === 'single') {
+          previous = _this.tags[0];
+          if (previous && previous.$subject !== e.target) {
+            previous.destroy();
+          }
+        }
+        return _this.toggleTag(e.target);
+      };
+    })(this));
     return li;
   };
 
-  buildDropdown = function(select) {
-    var type, ul;
-    type = select.getAttribute('multiple') ? 'multiple' : 'single';
-    ul = document.createElement('ul');
-    ul.className = 'f-dropdown custom-dropdown-options';
-    ul.dataset.prompt = select.dataset.prompt;
-    ul.dataset.type = type;
-    ul.dataset.target = '#' + select.getAttribute('id');
-    forEach(select.querySelectorAll('option'), function(option) {
-      return ul.appendChild(buildDropdownItem(option));
-    });
-    return ul;
-  };
-
-  calculatePrompt = function(ul) {
-    var defaultPrompt, selectedItems, temp;
-    defaultPrompt = ul.dataset.prompt === 'undefined' ? "Choose..." : ul.dataset.prompt;
-    selectedItems = ul.querySelectorAll('li.selected').length || 0;
-    switch (selectedItems) {
-      case 0:
-        return defaultPrompt;
-      case 1:
-        temp = ul.querySelector('li.selected');
-        return temp.textContent || temp.innerText;
-      default:
-        return selectedItems.toString() + ' items';
+  Dropdown.prototype.findTag = function(search) {
+    var i, len, ref, tag;
+    ref = this.tags;
+    for (i = 0, len = ref.length; i < len; i++) {
+      tag = ref[i];
+      if (tag.$subject === search) {
+        return tag;
+      }
     }
+    return null;
   };
 
-  findTag = function(target, value) {
-    var selector;
-    selector = "[data-reftarget='" + target + "'][data-refvalue='" + value + "']";
-    return document.getElementById('tags').querySelector(selector);
+  Dropdown.prototype.addToTags = function(tag) {
+    this.tags.push(tag);
+    return this.setPilot();
   };
 
-  addTag = function(elem) {
-    var tag, target, value;
-    addClass(elem, 'selected');
-    target = elem.parentNode.dataset.target;
-    value = elem.dataset.value;
-    if (findTag(target, value) === null) {
-      tag = document.createElement('a');
-      tag.className = 'dropdown-tag';
-      tag.dataset.reftarget = target;
-      tag.dataset.refvalue = value;
-      tag.innerHTML = value;
-      return document.getElementById('tags').appendChild(tag);
+  Dropdown.prototype.removeFromTags = function(tag) {
+    var index;
+    index = this.tags.indexOf(tag);
+    if (index > -1) {
+      this.tags.splice(index, 1);
     }
+    return this.setPilot();
   };
 
-  removeTag = function(elem) {
-    var tag, target, value;
-    removeClass(elem, 'selected');
-    target = elem.parentNode.dataset.target;
-    value = elem.dataset.value;
-    tag = findTag(target, value);
-    return tag.parentNode.removeChild(tag);
-  };
-
-  toggleTag = function(elem) {
-    if (hasClass(elem, 'selected')) {
-      return removeTag(elem);
+  Dropdown.prototype.toggleTag = function(li) {
+    var tag;
+    tag = this.findTag(li);
+    if (!!tag) {
+      return tag.destroy();
     } else {
-      return addTag(elem);
+      return this.addToTags(new Tag(this, li));
     }
-  };
-
-  initTags = function(dropdown) {
-    return forEach(dropdown.querySelectorAll('li.selected'), function(li) {
-      return addTag(li);
-    });
   };
 
   ready(function() {
-    forEachElement('form.custom select', function(select) {
-      var div, dropdown;
-      select.style.display = 'none';
-      div = buildDiv();
-      dropdown = buildDropdown(select);
-      div.appendChild(buildPilot());
-      div.appendChild(dropdown);
-      setPilot(dropdown);
-      initTags(dropdown);
-      return select.parentNode.appendChild(div);
-    });
-    addEventListener(document, 'click', '.custom-dropdown-button', function(e) {
-      var dropdown, others;
-      e.preventDefault();
-      e.stopPropagation();
-      dropdown = this.nextSibling;
-      if (hasClass(dropdown, 'open')) {
-        return removeClass(dropdown, 'open');
-      } else {
-        others = closest(dropdown, 'form.custom').querySelectorAll('.custom-dropdown-options.open');
-        removeClass(others, 'open');
-        return addClass(dropdown, 'open');
-      }
-    });
-    addEventListener(document, 'click', 'ul.custom-dropdown-options > li', function(e) {
-      var dropdown, previous;
-      e.preventDefault();
-      e.stopPropagation();
-      dropdown = this.parentNode;
-      if (dropdown.dataset.type === 'single') {
-        previous = dropdown.querySelector('li.selected');
-        if (previous && previous !== this) {
-          removeTag(previous);
-        }
-      }
-      toggleTag(this);
-      return setPilot(dropdown);
-    });
-    addEventListener(document, 'click', null, function(e) {
-      var dropdown, li, tag;
-      if (hasClass(e.target, 'dropdown-tag')) {
-        e.preventDefault();
-        tag = e.target;
-        dropdown = document.querySelector("[data-target='" + tag.dataset.reftarget + "']");
-        li = dropdown.querySelector("[data-value='" + tag.dataset.refvalue + "']");
-        removeTag(li);
-        return setPilot(dropdown);
-      }
-    });
-    return addEventListener(document, 'click', null, function() {
-      var dropdowns;
-      dropdowns = document.querySelectorAll('.custom-dropdown-options.open');
-      return removeClass(dropdowns, 'open');
-    });
+    return new App();
   });
 
 }).call(this);

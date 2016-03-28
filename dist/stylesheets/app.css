@@ -42,6 +42,7 @@ ul.custom-dropdown-options {
       position: relative;
       top: -1em; } }
   ul.custom-dropdown-options li {
+    cursor: pointer;
     height: 2.4375em;
     padding: .5em 0.7em; }
     ul.custom-dropdown-options li.selected {
