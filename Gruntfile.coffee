@@ -49,6 +49,9 @@ module.exports = (grunt) ->
           dest: 'dist/'
         }]
 
+    jshint:
+      all: ['dist/js/*.js', 'test/**/*.js']
+
     watch:
       options:
         livereload: true
@@ -79,6 +82,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-contrib-uglify')
   grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks('grunt-slim')
+  grunt.loadNpmTasks('grunt-contrib-jshint')
 
   grunt.loadNpmTasks('grunt-contrib-watch')
 

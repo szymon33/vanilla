@@ -13,24 +13,18 @@ ready = (fn) ->
     document.attachEvent 'onreadystatechange', ->
       fn() if (document.readyState != 'loading')
 
-addEventListener = (el, eventName, filter, handler) ->
-  make = (inner, eventName, handler) ->
-    if (inner.addEventListener)
-      inner.addEventListener(eventName, handler, false)
-    else
-      inner.attachEvent 'on' + eventName, ->
-        handler.call(inner)
-  if filter?
-    forEach el.querySelectorAll(filter), (node) ->
-      make(node, eventName, handler)    
+addEventListener = (el, eventName, handler) ->
+  if (el.addEventListener)
+    el.addEventListener(eventName, handler, false)
   else
-    make(el, eventName, handler)
-
-forEachElement = (selector, fn) ->
-  forEach document.querySelectorAll(selector), (node) -> fn(node)
+    el.attachEvent 'on' + eventName, ->
+      handler.call(el)
 
 addClass = (el, className) ->
-  if (el.classList) then el.classList.add(className) else el.className += ' ' + className
+  if (el.classList)
+    el.classList.add(className)
+  else
+    el.className += ' ' + className
 
 removeClass = (el, className) ->
   make = (inner, className) ->
@@ -38,6 +32,7 @@ removeClass = (el, className) ->
       inner.classList.remove(className)
     else if inner.className
       inner.className = inner.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ')
+    return
   if el.length
     forEach el, (item) -> make(item, className)
   else
@@ -48,143 +43,154 @@ hasClass = (el, className) ->
     el.classList.contains(className)
   else
     new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className)
+  return
 
-closest = (el, selector) ->
-  while(el)
-    el = el.parentNode
-    if (el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector).call(el, selector)
-      break
+#
+# App Class (act like dropdown menu)
+#
+
+App = () ->
+  @selected = null
+
+  forEach document.querySelectorAll('form.custom select'), (select) =>
+    select.style.display = 'none'
+    new Dropdown(@, select)
+
+  addEventListener document, 'click', =>
+    if !!@selected
+      removeClass(@selected, 'open')
+      @selected = null
+    return
+
+App.prototype.select = ($dropdown) ->
+  if $dropdown == @selected
+    removeClass($dropdown, 'open')
+    @selected = null
+  else
+    removeClass(@selected, 'open') if !!@selected
+    addClass($dropdown, 'open')
+    @selected = $dropdown
+  return
+
+#
+# Tag Class Implementation
+#
+
+Tag = (maker, subject) ->
+  @maker = maker
+  @$subject = subject
+  addClass(@$subject, 'selected')
+  @$container = document.getElementById('tags')
+  @$el = @el()
+  @$container.appendChild(@$el)
+  @
+
+Tag.prototype.el = ->
+  el = document.createElement('a')
+  el.className = 'dropdown-tag'
+  el.innerHTML = @$subject.innerHTML
+  el.href = '#'
+  addEventListener el, 'click', (e) =>
+    e.preventDefault()
+    @destroy()
   el
 
+Tag.prototype.destroy = ->
+  removeClass(@$subject, 'selected')
+  @$container.removeChild(@$el)
+  @maker.removeFromTags(@)
+
 #
-# Implementation
+# Dropdown Class Implementation
 #
 
-buildDiv = ->
-  div = document.createElement('div')
-  div.className = 'custom-dropdown-area'
-  div
+Dropdown = (collection, select) ->
+  @collection = collection
+  @tags = []
+  @type = select.getAttribute('multiple') || 'single'
+  @defaultPrompt = select.dataset.prompt || "Choose..."
+  @$el = @el()
+  @$dropdown = @dropdown()
+  @$pilot = @pilot()
+  forEach select.querySelectorAll('option'), (option) =>
+    @$dropdown.appendChild(@buildItem(option))
+  @$el.appendChild(@$pilot)
+  @$el.appendChild(@$dropdown)
+  select.parentNode.appendChild(@$el)
+  @setPilot()
+  @
 
-buildPilot = ->
+Dropdown.prototype.el = ->
+  el = document.createElement('div')
+  el.className = 'custom-dropdown-area'
+  el
+
+Dropdown.prototype.dropdown = ->
+  ul = document.createElement('ul')
+  ul.className = 'f-dropdown custom-dropdown-options'
+  ul
+
+Dropdown.prototype.pilot = ->
   pilot = document.createElement('a')
   pilot.className = 'custom-dropdown-button'
   pilot.href = '#'
+  addEventListener pilot, 'click', (e) =>
+    e.preventDefault()
+    e.stopPropagation()
+    @collection.select(@$dropdown)
   pilot
 
-setPilot = (dropdown) ->
-  pilot = dropdown.previousSibling
-  if (pilot.textContent != undefined)
-    pilot.textContent = calculatePrompt(dropdown)
+Dropdown.prototype.setPilot = ->
+  if @$pilot.textContent != undefined
+    @$pilot.textContent = @calculatePrompt()
   else
-    pilot.innerText = calculatePrompt(dropdown)
-  pilot
+    @$pilot.innerText = @calculatePrompt()
+  return
 
-buildDropdownItem = (option) ->
+Dropdown.prototype.calculatePrompt = ->
+  counter = @tags.length
+  switch counter
+    when 0 then @defaultPrompt
+    when 1
+      temp = @tags[0].$el
+      (temp.textContent || temp.innerText)
+    else counter.toString() + ' items'
+
+Dropdown.prototype.buildItem = (option) ->
   li = document.createElement('li')
   li.className = 'option-item'
-  li.dataset.value = option.value
-  span = document.createElement('span')
-  span.className = 'option-title'
-  span.innerHTML = option.innerHTML
-  li.appendChild(span)
-  if option.getAttribute('selected') then addClass(li, 'selected') else removeClass(li, 'selected')
+  li.innerHTML = option.innerHTML
+  if option.getAttribute('selected') then @addToTags(new Tag(@, li))
+  addEventListener li, 'click', (e) =>
+    e.preventDefault()
+    e.stopPropagation()
+    if @type == 'single'
+      previous = @tags[0]
+      previous.destroy() if previous && previous.$subject != e.target
+    @toggleTag(e.target)
   li
 
-buildDropdown = (select) ->
-  type = if select.getAttribute('multiple') then 'multiple' else 'single'
-  ul = document.createElement('ul')
-  ul.className = 'f-dropdown custom-dropdown-options'
-  ul.dataset.prompt = select.dataset.prompt
-  ul.dataset.type = type
-  ul.dataset.target = '#' + select.getAttribute('id')
-  forEach select.querySelectorAll('option'), (option) -> ul.appendChild(buildDropdownItem(option))
-  ul
+Dropdown.prototype.findTag = (search) ->
+  for tag in @tags
+    return tag if tag.$subject == search
+  null
 
-calculatePrompt = (ul) ->
-  defaultPrompt = if ul.dataset.prompt == 'undefined' then "Choose..." else ul.dataset.prompt
-  selectedItems = ul.querySelectorAll('li.selected').length || 0
-  return switch selectedItems
-    when 0 then defaultPrompt
-    when 1
-      temp = ul.querySelector('li.selected')
-      (temp.textContent || temp.innerText)
-    else selectedItems.toString() + ' items'
+Dropdown.prototype.addToTags = (tag) ->
+  @tags.push(tag)
+  @setPilot()
 
-findTag = (target, value) ->
-  selector = "[data-reftarget='" + target + "'][data-refvalue='" + value + "']"
-  document.getElementById('tags').querySelector(selector)
+Dropdown.prototype.removeFromTags = (tag) ->
+  index = @tags.indexOf(tag)
+  @tags.splice(index, 1) if (index > -1)
+  @setPilot()
 
-addTag = (elem) ->
-  addClass(elem, 'selected')
-  target = elem.parentNode.dataset.target
-  value =  elem.dataset.value
-  if findTag(target, value) == null
-    tag = document.createElement('a')
-    tag.className = 'dropdown-tag'
-    tag.dataset.reftarget = target
-    tag.dataset.refvalue = value
-    tag.innerHTML = value
-    document.getElementById('tags').appendChild(tag)
-
-removeTag = (elem) ->
-  removeClass(elem, 'selected')
-  target = elem.parentNode.dataset.target
-  value =  elem.dataset.value
-  tag = findTag(target, value)
-  tag.parentNode.removeChild(tag)
-
-toggleTag = (elem) ->
-  if hasClass(elem, 'selected') then removeTag(elem) else addTag(elem)
-
-initTags = (dropdown) ->
-  forEach dropdown.querySelectorAll('li.selected'), (li) -> addTag(li)
+Dropdown.prototype.toggleTag = (li) ->
+  tag = @findTag(li)
+  if !!tag then tag.destroy() else @addToTags(new Tag(@, li))
 
 #
 # On DOM loaded
 #
 
 ready ->
-  forEachElement 'form.custom select', (select) ->
-    select.style.display = 'none'
-    div = buildDiv()
-    dropdown = buildDropdown(select)
-    div.appendChild(buildPilot())
-    div.appendChild(dropdown)
-    setPilot(dropdown)
-    initTags(dropdown)
-    select.parentNode.appendChild(div)
-
-  addEventListener document, 'click', '.custom-dropdown-button', (e) ->
-    e.preventDefault()
-    e.stopPropagation()
-    dropdown = @.nextSibling
-    if hasClass(dropdown, 'open')
-      removeClass(dropdown, 'open')
-    else
-      # close others, act like menu
-      others = closest(dropdown, 'form.custom').querySelectorAll('.custom-dropdown-options.open')
-      removeClass(others, 'open')
-      addClass(dropdown, 'open')
-
-  addEventListener document, 'click', 'ul.custom-dropdown-options > li', (e) ->
-    e.preventDefault()
-    e.stopPropagation()
-    dropdown = @.parentNode
-    if dropdown.dataset.type == 'single'
-      previous = dropdown.querySelector('li.selected')
-      removeTag(previous) if previous && previous != @
-    toggleTag(@)
-    setPilot(dropdown)
-
-  addEventListener document, 'click', null, (e) ->
-    if hasClass(e.target, 'dropdown-tag')
-      e.preventDefault()
-      tag = e.target
-      dropdown = document.querySelector("[data-target='" + tag.dataset.reftarget + "']")
-      li =  dropdown.querySelector("[data-value='" + tag.dataset.refvalue + "']")
-      removeTag(li)
-      setPilot(dropdown)
-
-  addEventListener document, 'click', null, ->
-    dropdowns = document.querySelectorAll('.custom-dropdown-options.open')
-    removeClass(dropdowns, 'open')
+  new App()
