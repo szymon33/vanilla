@@ -1,10 +1,18 @@
 # Vanilla Challenge
 
-This is plain JavaScript usage example (no jQuery).
+[![Code Climate](https://codeclimate.com/github/szymon33/vanilla/badges/gpa.svg)](https://codeclimate.com/github/szymon33/vanilla)
 
-Task specification is [here](docs/javascript-test-endouble.mov)
+This is plain JavaScript DOM usage example (no jQuery).
 
-Live version is [here](http://www.act.poznan.pl/vanilla/index.html)
+### Task specification (video)
+
+[![Task specification](http://img.youtube.com/vi/c63P4fVcbzU/0.jpg)](http://www.youtube.com/watch?v=c63P4fVcbzU)
+
+### Live version
+
+[here](http://www.act.poznan.pl/vanilla/index.html)
+
+### Screenshots
 
 Large screen view
 
@@ -13,5 +21,3 @@ Large screen view
 iPhone 5 (portrait) view
 
 ![![screenshot]](docs/screenshot2.png)
-
-Quick jQuery approche (not required) is [here](https://gist.github.com/szymon33/d742ebeb0a09af75396e)
