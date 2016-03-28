@@ -56,6 +56,7 @@ ul.custom-dropdown-options {
   background: $input-background;
 
   li {
+    cursor: pointer;
     height: 2.4375em;
     padding: .5em 0.7em;
     &.selected {
