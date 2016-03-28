@@ -38,13 +38,6 @@ removeClass = (el, className) ->
   else
     make(el, className)
 
-hasClass = (el, className) ->
-  if (el.classList)
-    el.classList.contains(className)
-  else
-    new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className)
-  return
-
 #
 # App Class (act like dropdown menu)
 #

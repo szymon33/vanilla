@@ -1,5 +1,5 @@
 (function() {
-  var App, Dropdown, Tag, addClass, addEventListener, forEach, hasClass, ready, removeClass;
+  var App, Dropdown, Tag, addClass, addEventListener, forEach, ready, removeClass;
 
   forEach = Function.prototype.call.bind(Array.prototype.forEach);
 
@@ -50,14 +50,6 @@
       });
     } else {
       return make(el, className);
-    }
-  };
-
-  hasClass = function(el, className) {
-    if (el.classList) {
-      el.classList.contains(className);
-    } else {
-      new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
     }
   };
 
