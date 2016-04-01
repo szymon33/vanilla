@@ -69,8 +69,7 @@ App.prototype.select = ($dropdown) ->
 # Tag Class Implementation
 #
 
-Tag = (maker, subject) ->
-  @maker = maker
+Tag = (subject) ->
   @$subject = subject
   addClass(@$subject, 'selected')
   @$container = document.getElementById('tags')
@@ -91,7 +90,7 @@ Tag.prototype.el = ->
 Tag.prototype.destroy = ->
   removeClass(@$subject, 'selected')
   @$container.removeChild(@$el)
-  @maker.removeFromTags(@)
+  @onDestroy(@)
 
 #
 # Dropdown Class Implementation
@@ -153,7 +152,7 @@ Dropdown.prototype.buildItem = (option) ->
   li = document.createElement('li')
   li.className = 'option-item'
   li.innerHTML = option.innerHTML
-  if option.getAttribute('selected') then @addToTags(new Tag(@, li))
+  if option.getAttribute('selected') then @addTag(li)
   addEventListener li, 'click', (e) =>
     e.preventDefault()
     e.stopPropagation()
@@ -179,11 +178,15 @@ Dropdown.prototype.removeFromTags = (tag) ->
 
 Dropdown.prototype.toggleTag = (li) ->
   tag = @findTag(li)
-  if !!tag then tag.destroy() else @addToTags(new Tag(@, li))
+  if !!tag then tag.destroy() else @addTag(li)
+
+Dropdown.prototype.addTag = (li) ->
+  tag = new Tag(li)
+  tag.onDestroy = (self) => @removeFromTags(self)
+  @addToTags(tag)
 
 #
 # On DOM loaded
 #
 
-ready ->
-  new App()
+ready -> new App()

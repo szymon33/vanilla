@@ -84,8 +84,7 @@
     }
   };
 
-  Tag = function(maker, subject) {
-    this.maker = maker;
+  Tag = function(subject) {
     this.$subject = subject;
     addClass(this.$subject, 'selected');
     this.$container = document.getElementById('tags');
@@ -112,7 +111,7 @@
   Tag.prototype.destroy = function() {
     removeClass(this.$subject, 'selected');
     this.$container.removeChild(this.$el);
-    return this.maker.removeFromTags(this);
+    return this.onDestroy(this);
   };
 
   Dropdown = function(collection, select) {
@@ -192,7 +191,7 @@
     li.className = 'option-item';
     li.innerHTML = option.innerHTML;
     if (option.getAttribute('selected')) {
-      this.addToTags(new Tag(this, li));
+      this.addTag(li);
     }
     addEventListener(li, 'click', (function(_this) {
       return function(e) {
@@ -243,8 +242,19 @@
     if (!!tag) {
       return tag.destroy();
     } else {
-      return this.addToTags(new Tag(this, li));
+      return this.addTag(li);
     }
+  };
+
+  Dropdown.prototype.addTag = function(li) {
+    var tag;
+    tag = new Tag(li);
+    tag.onDestroy = (function(_this) {
+      return function(self) {
+        return _this.removeFromTags(self);
+      };
+    })(this);
+    return this.addToTags(tag);
   };
 
   ready(function() {
