@@ -2,7 +2,7 @@ describe('Dropdown', function() {
   var form = document.createElement('form');
   var app = new App();
   var select = document.createElement('select');
-  form.appendChild(select);
+  form.appendChild(select); // parent element
   var dropdown_empty = new Dropdown(app, select);
 
   it('constructor returns self', function() {
@@ -81,21 +81,49 @@ describe('Dropdown', function() {
       expect(dropdown_empty).to.respondTo('el');
     });
 
-    it('is div tag', function(){
+    it('is div element', function(){
       expect(el().tagName).to.equal('DIV');
     });
 
     it("it has 'custom-dropdown-area' class", function(){
-      expect(el().className).to.equal('custom-dropdown-area');
+      expect(el().className).to.contain('custom-dropdown-area');
     });
   });
 
-  it('responds to dropdown method', function() {
-    expect(dropdown_empty).to.respondTo('dropdown');
+  describe('dropdown method', function() {
+    var dropdown = dropdown_empty.dropdown;
+
+    it('is valid', function() {
+      expect(dropdown_empty).to.respondTo('dropdown');
+    });
+
+    it('returns ul element', function(){
+      expect(dropdown().tagName).to.equal('UL');
+    });
+
+    it('has class names', function(){
+      expect(dropdown().className).to.contain('f-dropdown custom-dropdown-options');
+    });
   });
 
-  it('responds to pilot method', function() {
-    expect(dropdown_empty).to.respondTo('pilot');
+  describe('pilot method', function() {
+    var pilot = dropdown_empty.pilot;
+
+    it('is valid', function() {
+      expect(dropdown_empty).to.respondTo('pilot');
+    });
+
+    it("returns 'A' element", function() {
+      expect(pilot().tagName).to.equal('A');
+    });
+
+    it("has 'custom-dropdown-button' class", function() {
+      expect(pilot().className).to.contain('custom-dropdown-button');
+    });
+
+    it("has '#' href", function() {
+      expect(pilot().href).to.contain('#');
+    });
   });
 
   it('responds to setPilot method', function() {
@@ -106,8 +134,17 @@ describe('Dropdown', function() {
     expect(dropdown_empty).to.respondTo('calculatePrompt');
   });
 
-  it('responds to buildItem method', function() {
-    expect(dropdown_empty).to.respondTo('buildItem');
+  describe('buildItem method', function(){
+    var buildItem = dropdown_empty.buildItem;
+    var option = document.createElement('option');
+
+    it('is valid', function() {
+      expect(dropdown_empty).to.respondTo('buildItem');
+    });
+
+    it('returns LI element', function(){
+      expect(buildItem(option).tagName).to.equal('LI');
+    });
   });
 
   it('responds to findTag method', function() {
