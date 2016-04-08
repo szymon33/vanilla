@@ -9,11 +9,13 @@ module.exports = (grunt) ->
 
     coffee:
       glob_to_multiple:
+        options:
+          bare: true
         expand: true
         flatten: true
         cwd: 'coffee'
         src: ['*.coffee']
-        dest: 'dist/js'
+        dest: 'js'
         ext: '.js'
 
     sass:
@@ -50,7 +52,13 @@ module.exports = (grunt) ->
         }]
 
     jshint:
-      all: ['dist/js/*.js', 'test/**/*.js']
+      all: ['js/*.js', 'tests/**/*.js']
+
+    mocha:
+      all:
+        src: ['tests/index.template.html']
+      options:
+        run: true
 
     watch:
       options:
@@ -59,7 +67,7 @@ module.exports = (grunt) ->
 
       coffee:
         files: 'coffee/*.coffee'
-        tasks: ['coffee']
+        tasks: ['coffee', 'mocha:all']
 
       js:
         files: 'js/**'
@@ -77,14 +85,20 @@ module.exports = (grunt) ->
         files: 'vendors/**'
         tasks: ['copy']
 
+      mocha:
+        files: 'tests/**'
+        tasks: ['mocha']
+
   grunt.loadNpmTasks('grunt-contrib-sass')
   grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-contrib-uglify')
   grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks('grunt-slim')
   grunt.loadNpmTasks('grunt-contrib-jshint')
+  grunt.loadNpmTasks('grunt-mocha')
 
   grunt.loadNpmTasks('grunt-contrib-watch')
 
   # Default task(s).
-  grunt.registerTask('default', ['copy', 'sass', 'coffee', 'slim', 'uglify'])
+  grunt.registerTask('test', ['jshint', 'mocha'])
+  grunt.registerTask('default', ['copy', 'sass', 'coffee', 'slim', 'uglify', 'mocha'])
