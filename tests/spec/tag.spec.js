@@ -17,10 +17,27 @@ describe('Tag', function() {
       expect(tag.$subject).to.not.be.a('null');
       expect(tag.$subject).to.equal(li);
     });
+
+    it('has class selected', function() {
+      expect(tag.$subject.className).to.contain('selected');
+    });
   });
 
-  it('has $container property', function() {
-    expect(tag).to.have.property('$container');
+  describe('container property', function(){
+    tags.id = 'tags';
+
+    it('is valid', function(){
+      expect(tag).to.have.property('$container');
+      expect(tag.$container).to.not.be.a('null');
+    });
+
+    it('is div', function() {
+      expect(tag.$container.tagName).to.equal('DIV');
+    });
+
+    it('id equals "tags"', function() {
+      expect(tag.$container.id).to.equal('tags');
+    });
   });
 
   it('has $el property', function() {
@@ -31,7 +48,7 @@ describe('Tag', function() {
     var el = tag.el;
 
     it('is valid', function() {
-      expect(tag).to.respondTo('el');      
+      expect(tag).to.respondTo('el');
     });
 
     it("returns 'a' element", function() {
@@ -42,14 +59,14 @@ describe('Tag', function() {
       expect(tag.el().className).to.contain('dropdown-tag');
     });
 
-    it("has class innter from subject", function(){
+    it("has innerHTML from subject", function(){
       expect(tag.el().innerHTML).to.equal('blabla');
       expect(tag.el().innerHTML).to.equal(tag.$subject.innerHTML);
-    });    
+    });
 
-    it("has class '#' href", function(){
+    it("has href '#'", function(){
       expect(tag.el().href).to.contain('#');
-    });    
+    });
   });
 
   describe('destroy method', function() {

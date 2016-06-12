@@ -15,6 +15,7 @@
     "grunt-contrib-uglify": "^1.0.1",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-mocha": "^1.0.0",
+    "grunt-mocha-test": "^0.12.7",
     "grunt-slim": "^0.1.0",
     "mocha": "^2.4.5"
   },

@@ -60,6 +60,19 @@ module.exports = (grunt) ->
       options:
         run: true
 
+    mochaTest:
+      test:
+        options:
+          reporter: 'spec'
+          require: 'node_modules/blanket'
+        src: ['tests/**/*.js']
+      coverage:
+        options:
+          reporter: 'html-cov'
+          quiet: true
+          captureFile: 'coverage.html'
+        src: ['tests/**/*.js']
+
     watch:
       options:
         livereload: true
@@ -96,9 +109,11 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-slim')
   grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-mocha')
+  grunt.loadNpmTasks('grunt-mocha-test')
 
   grunt.loadNpmTasks('grunt-contrib-watch')
 
   # Default task(s).
   grunt.registerTask('test', ['jshint', 'mocha'])
   grunt.registerTask('default', ['copy', 'sass', 'coffee', 'slim', 'uglify', 'mocha'])
+  grunt.registerTask('mt', 'mochaTest')
